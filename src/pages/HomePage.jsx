@@ -1,111 +1,30 @@
-import { useState, useEffect } from 'react';
-import { getProducts, getProductsByCategory, getCategories } from '../services/api';
-import ProductCard from '../components/ProductCard';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
+import ProductList from '../components/ProductList';
+import { isAuthenticated } from '../utils/auth';
 
-const ProductList = () => {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+const HomePage = () => {
+  const navigate = useNavigate();
 
-  // Fetch products and categories on component mount
+  // Check if user is authenticated
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const categoriesData = await getCategories();
-        setCategories(categoriesData);
-        
-        const productsData = await getProducts();
-        setProducts(productsData);
-      } catch (err) {
-        setError('Failed to fetch products. Please try again later.');
-        console.error('Error fetching data:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // Handle category change
-  useEffect(() => {
-    const fetchProductsByCategory = async () => {
-      setIsLoading(true);
-      try {
-        let productsData;
-        if (selectedCategory) {
-          productsData = await getProductsByCategory(selectedCategory);
-        } else {
-          productsData = await getProducts();
-        }
-        setProducts(productsData);
-      } catch (err) {
-        setError('Failed to fetch products. Please try again later.');
-        console.error('Error fetching products:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProductsByCategory();
-  }, [selectedCategory]);
-
-  // Filter products by search term
-  const filteredProducts = products.filter(product => 
-    product.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleCategoryChange = (e) => {
-    setSelectedCategory(e.target.value);
-  };
+    if (!isAuthenticated()) {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   return (
-    <div className="product-list-container">
-      <div className="filters">
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+    <div className="home-page">
+      <Header />
+      <main className="main-content">
+        <div className="container">
+          <h1>Our Products</h1>
+          <ProductList />
         </div>
-        
-        <div className="category-filter">
-          <select 
-            value={selectedCategory} 
-            onChange={handleCategoryChange}
-          >
-            <option value="">All Categories</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {isLoading && <div className="loading">Loading products...</div>}
-      
-      {error && <div className="error">{error}</div>}
-      
-      {!isLoading && !error && (
-        <div className="product-grid">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))
-          ) : (
-            <div className="no-products">No products found</div>
-          )}
-        </div>
-      )}
+      </main>
     </div>
   );
 };
 
-export default ProductList;
+export default HomePage;

@@ -16,8 +16,14 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-      const parsedCart = JSON.parse(savedCart);
-      setCartItems(parsedCart);
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        setCartItems(parsedCart);
+      } catch (error) {
+        console.error('Error parsing cart from localStorage', error);
+        localStorage.removeItem('cart'); // Remove invalid data
+        setCartItems([]);
+      }
     }
   }, []);
 
@@ -35,6 +41,7 @@ export const CartProvider = ({ children }) => {
 
   // Add item to cart
   const addToCart = (product, quantity = 1) => {
+    console.log(`Adding ${quantity} of product ${product.id} to cart`); 
     setCartItems(prevItems => {
       // Check if item is already in cart
       const existingItemIndex = prevItems.findIndex(item => item.id === product.id);
@@ -42,7 +49,10 @@ export const CartProvider = ({ children }) => {
       if (existingItemIndex !== -1) {
         // Update quantity if item exists
         const updatedItems = [...prevItems];
-        updatedItems[existingItemIndex].quantity += quantity;
+        updatedItems[existingItemIndex] = {
+          ...updatedItems[existingItemIndex],
+          quantity: updatedItems[existingItemIndex].quantity + quantity
+        };
         return updatedItems;
       } else {
         // Add new item to cart

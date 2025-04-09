@@ -1,13 +1,23 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const [showAddedMessage, setShowAddedMessage] = useState(false);
   
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
     addToCart(product, 1);
+    
+    // Show "Added to cart" message
+    setShowAddedMessage(true);
+    
+    // Hide message after 2 seconds
+    setTimeout(() => {
+      setShowAddedMessage(false);
+    }, 2000);
   };
 
   return (
@@ -30,7 +40,7 @@ const ProductCard = ({ product }) => {
         className="add-to-cart-button"
         onClick={handleAddToCart}
       >
-        Add to Cart
+        {showAddedMessage ? 'Added to Cart!' : 'Add to Cart'}
       </button>
     </div>
   );

@@ -89,7 +89,12 @@ const ProductList = () => {
         </div>
       </div>
 
-      {isLoading && <div className="loading">Loading products...</div>}
+      {isLoading && (
+        <div className="loading">
+          <div className="loading-spinner"></div>
+          <p>Loading amazing products...</p>
+        </div>
+      )}
       
       {error && <div className="error">{error}</div>}
       
@@ -100,7 +105,7 @@ const ProductList = () => {
               <ProductCard key={product.id} product={product} />
             ))
           ) : (
-            <div className="no-products">No products found</div>
+            <div className="no-products">No products found matching your criteria</div>
           )}
         </div>
       )}
